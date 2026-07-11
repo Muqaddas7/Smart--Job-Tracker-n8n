@@ -27,27 +27,21 @@ This project's design addresses both:
 
 ## Workflow Architecture
 
-Schedule Trigger
-|
-|--- HTTP Request (Company A - Greenhouse API) --|
-|--- HTTP Request (Company B - Greenhouse API) --|--- Merge
-|--- HTTP Request (Company C - Greenhouse API) --|         |
-v
-Get Existing Jobs (Google Sheets) ---------------> HTTP Request (Groq AI - score and filter)
-|
-v
-Code (parse AI response,
-skip already-seen URLs)
-|
-v
-Append Row in Sheet
-|
-v
-Code (combine all matches
-into one HTML block)
-|
-v
-Send Email (Gmail)
+```mermaid
+flowchart TD
+    A[Schedule Trigger] --> B1[HTTP Request - Company A]
+    A --> B2[HTTP Request - Company B]
+    A --> B3[HTTP Request - Company C]
+    B1 --> C[Merge]
+    B2 --> C
+    B3 --> C
+    C --> D[HTTP Request - Groq AI: score and filter]
+    E[Get Existing Jobs - Google Sheets] --> D
+    D --> F[Code: parse AI response, skip already-seen URLs]
+    F --> G[Append Row in Sheet]
+    G --> H[Code: combine matches into one HTML block]
+    H --> I[Send Email - Gmail]
+```
 
 ## Tech Stack
 
