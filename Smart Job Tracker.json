@@ -104,17 +104,17 @@
         "operation": "append",
         "documentId": {
           "__rl": true,
-          "value": "1_ixEbJYiwY4YvZy08xl5JSkIobmetLU-6wgWr0ikfAk",
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
           "mode": "list",
           "cachedResultName": "Smart Job Tracker",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ixEbJYiwY4YvZy08xl5JSkIobmetLU-6wgWr0ikfAk/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ixEbJYiwY4YvZy08xl5JSkIobmetLU-6wgWr0ikfAk/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit#gid=0"
         },
         "columns": {
           "mappingMode": "defineBelow",
@@ -215,14 +215,14 @@
       "name": "Append row in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "hVNTFxxMMWDJaBKe",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Google Sheets OAuth2 API"
         }
       }
     },
     {
       "parameters": {
-        "sendTo": "muqaddassatti708@gmail.com",
+        "sendTo": "your-email@example.com",
         "subject": "=Smart Job Tracker - {{ $now.format('dd LLL yyyy') }}",
         "message": "=<h2>New Job Matches Found! ({{ $json.totalJobs }} jobs)</h2>\n{{ $json.emailHtml }}\n<hr>\n<p><em>Sent automatically by your n8n Job Tracker</em></p>",
         "options": {}
@@ -232,10 +232,10 @@
       "position": [864, 304],
       "id": "428ce121-0708-4eb2-893c-4337132cc52d",
       "name": "Send a message",
-      "webhookId": "0fb696d3-b3ea-4efe-b202-25109d3ffb9d",
+      "webhookId": "YOUR_WEBHOOK_ID",
       "credentials": {
         "gmailOAuth2": {
-          "id": "TejT1MEyiLmwAxXI",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Gmail OAuth2 API"
         }
       }
@@ -254,17 +254,17 @@
       "parameters": {
         "documentId": {
           "__rl": true,
-          "value": "1_ixEbJYiwY4YvZy08xl5JSkIobmetLU-6wgWr0ikfAk",
+          "value": "YOUR_GOOGLE_SHEET_ID_HERE",
           "mode": "list",
           "cachedResultName": "Smart Job Tracker",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ixEbJYiwY4YvZy08xl5JSkIobmetLU-6wgWr0ikfAk/edit?usp=drivesdk"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit"
         },
         "sheetName": {
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
           "cachedResultName": "Sheet1",
-          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ixEbJYiwY4YvZy08xl5JSkIobmetLU-6wgWr0ikfAk/edit#gid=0"
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/YOUR_GOOGLE_SHEET_ID_HERE/edit#gid=0"
         },
         "options": {}
       },
@@ -275,7 +275,7 @@
       "name": "Get existing jobs",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "hVNTFxxMMWDJaBKe",
+          "id": "YOUR_CREDENTIAL_ID",
           "name": "Google Sheets OAuth2 API"
         }
       }
@@ -407,7 +407,7 @@
   "versionId": "5f21155a-456f-4c01-8cfe-1682e7206641",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "d01540d1f7773d12de9525a4668c84d99acef2497a8bbb6dcd395866a624cc8a"
+    "instanceId": "YOUR_INSTANCE_ID"
   },
   "nodeGroups": [],
   "id": "OPVmgzvz3nQS6Dgg",
