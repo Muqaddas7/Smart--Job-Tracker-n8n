@@ -1,0 +1,415 @@
+{
+  "name": "Smart Job Tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [-320, -64],
+      "id": "f2752b90-2aa4-4a47-a78e-3c9b81574c7e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://boards-api.greenhouse.io/v1/boards/celonis/jobs",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [256, -112],
+      "id": "702a69db-cc63-4c75-b648-7113fd567edf",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "url": "https://boards-api.greenhouse.io/v1/boards/doctolib/jobs",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [256, 304],
+      "id": "91e6d7e0-8194-4b8f-a7ba-2dddb84d40ea",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "url": "https://boards-api.greenhouse.io/v1/boards/stripe/jobs",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [256, 96],
+      "id": "31f95ef4-6542-4951-95df-bc50c9b104f5",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [560, -128],
+      "id": "ee545862-c47b-41e7-acff-741b44ae6f08",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Authorization",
+              "value": "Bearer YOUR_GROQ_API_KEY_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"model\": \"meta-llama/llama-4-scout-17b-16e-instruct\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a job matching assistant for a final-year AI Engineering student (graduating 2027) with skills in Python, FastAPI, LangChain, RAG, Groq, React, and n8n automation, targeting AI Engineer, ML Engineer, NLP Engineer, or Backend Developer roles. From the list of jobs provided, return only jobs that fit this profile at Entry to Mid level (exclude Senior/Staff/Principal/Director/5+ years experience roles), that are REMOTE or based in Germany, Netherlands, Sweden, Norway, Denmark, Finland, France, Spain, Portugal, UK, Ireland, Poland, Czech Republic, or Austria. Only include jobs posted within the last 24 hours based on the date field. For each match, return title, company, location, date, url, and a match_score (0-100) with a one-line reason. Return ONLY a raw JSON array with no markdown formatting, no code blocks. Empty array if no matches.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": JSON.stringify($input.all().flatMap(item => (item.json.jobs || []).map(j => ({t: j.title, l: j.location?.name, c: j.company_name, d: j.first_published, u: j.absolute_url}))).slice(0, 100))\n    }\n  ]\n} }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [560, 96],
+      "id": "c942d627-36be-43e0-8ff3-00b54370a9cf",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst results = [];\n\n// Existing sheet se URLs nikal lo (duplicate check ke liye)\nlet existingUrls = [];\ntry {\n  const existingRows = $('Get existing jobs').all();\n  existingUrls = existingRows.map(row => row.json.url).filter(Boolean);\n} catch (e) {\n  existingUrls = [];\n}\n\nfor (const item of items) {\n  const content = item.json.choices[0].message.content;\n  \n  let cleanContent = content.trim();\n  cleanContent = cleanContent.replace(/```json\\n?/g, '').replace(/```\\n?/g, '');\n  \n  try {\n    const jobs = JSON.parse(cleanContent);\n    for (const job of jobs) {\n      const jobUrl = job.u || job.url;\n      \n      // Sirf naya (non-duplicate) job add karo\n      if (!existingUrls.includes(jobUrl)) {\n        results.push({\n          json: {\n            title: job.t || job.title,\n            company: job.c || job.company,\n            location: job.l || job.location,\n            date: job.d || job.date,\n            url: jobUrl,\n            match_score: job.match_score,\n            reason: job.reason\n          }\n        });\n        existingUrls.push(jobUrl); // isi run ke andar bhi duplicate na ho\n      }\n    }\n  } catch (e) {\n    // Skip if parsing fails\n  }\n}\n\nreturn results;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [576, 304],
+      "id": "da7dec53-98a7-436c-8f08-912d02f81f33",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1_ixEbJYiwY4YvZy08xl5JSkIobmetLU-6wgWr0ikfAk",
+          "mode": "list",
+          "cachedResultName": "Smart Job Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ixEbJYiwY4YvZy08xl5JSkIobmetLU-6wgWr0ikfAk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ixEbJYiwY4YvZy08xl5JSkIobmetLU-6wgWr0ikfAk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Title": "={{ $json.title }}",
+            "Company": "={{ $json.company }}",
+            "Location": "={{ $json.location }}",
+            "Date": "={{ $json.date }}",
+            "url": "={{ $json.url }}",
+            "Match Score": "={{ $json.match_score }}",
+            "Reason": "={{ $json.reason }}",
+            "Applied Status": "Pending"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Company",
+              "displayName": "Company",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Location",
+              "displayName": "Location",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Match Score",
+              "displayName": "Match Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reason",
+              "displayName": "Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Applied Status",
+              "displayName": "Applied Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [848, -112],
+      "id": "f334c4a5-e8b2-4dea-914e-81fae2a03ea7",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hVNTFxxMMWDJaBKe",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "muqaddassatti708@gmail.com",
+        "subject": "=Smart Job Tracker - {{ $now.format('dd LLL yyyy') }}",
+        "message": "=<h2>New Job Matches Found! ({{ $json.totalJobs }} jobs)</h2>\n{{ $json.emailHtml }}\n<hr>\n<p><em>Sent automatically by your n8n Job Tracker</em></p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [864, 304],
+      "id": "428ce121-0708-4eb2-893c-4337132cc52d",
+      "name": "Send a message",
+      "webhookId": "0fb696d3-b3ea-4efe-b202-25109d3ffb9d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "TejT1MEyiLmwAxXI",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nlet jobsHtml = '';\n\nfor (const item of items) {\n  const job = item.json;\n  jobsHtml += `\n    <div style=\"margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px;\">\n      <h3>${job.Title || job.title}</h3>\n      <p>\n        Company: ${job.Company || job.company}<br>\n        Location: ${job.Location || job.location}<br>\n        Match Score: ${job['Match Score'] || job.match_score}/100<br>\n        Reason: ${job.Reason || job.reason}\n      </p>\n      <p><a href=\"${job.url}\">Apply Now</a></p>\n    </div>\n  `;\n}\n\nreturn [\n  {\n    json: {\n      emailHtml: jobsHtml,\n      totalJobs: items.length\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [848, 96],
+      "id": "a2454fff-d13b-48f1-9d92-bcf5a6a15682",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1_ixEbJYiwY4YvZy08xl5JSkIobmetLU-6wgWr0ikfAk",
+          "mode": "list",
+          "cachedResultName": "Smart Job Tracker",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ixEbJYiwY4YvZy08xl5JSkIobmetLU-6wgWr0ikfAk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_ixEbJYiwY4YvZy08xl5JSkIobmetLU-6wgWr0ikfAk/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [-256, 240],
+      "id": "8e1c3f35-f93e-4d61-b73a-c3f10d10a4f5",
+      "name": "Get existing jobs",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "hVNTFxxMMWDJaBKe",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get existing jobs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "5f21155a-456f-4c01-8cfe-1682e7206641",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d01540d1f7773d12de9525a4668c84d99acef2497a8bbb6dcd395866a624cc8a"
+  },
+  "nodeGroups": [],
+  "id": "OPVmgzvz3nQS6Dgg",
+  "tags": []
+}
