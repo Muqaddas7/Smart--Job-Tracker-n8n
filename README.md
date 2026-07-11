@@ -36,12 +36,11 @@ flowchart TD
     B2 --> C
     B3 --> C
     C --> D[HTTP Request - Groq AI: score and filter]
-    E[Get Existing Jobs - Google Sheets] --> D
     D --> F[Code: parse AI response, skip already-seen URLs]
+    E[Get Existing Jobs - Google Sheets] --> F
     F --> G[Append Row in Sheet]
     G --> H[Code: combine matches into one HTML block]
     H --> I[Send Email - Gmail]
-```
 
 ## Tech Stack
 
