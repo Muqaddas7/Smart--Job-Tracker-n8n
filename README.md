@@ -63,4 +63,4 @@ flowchart TD
    - Google Sheets OAuth (for logging and duplicate checks)
    - Gmail OAuth (for sending the digest)
    - Groq API key (for AI scoring — console.groq.com)
-3. Update the HTTP Request nodes with the Greenhouse board slugs for the companies to track:
+3. Update the HTTP Request nodes with the Greenhouse board slugs for the companies to track.
