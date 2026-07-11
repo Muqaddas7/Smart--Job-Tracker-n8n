@@ -41,6 +41,9 @@ flowchart TD
     F --> G[Append Row in Sheet]
     G --> H[Code: combine matches into one HTML block]
     H --> I[Send Email - Gmail]
+```
+
+## Tech Stack
 
 ## Tech Stack
 
